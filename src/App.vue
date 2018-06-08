@@ -1,19 +1,19 @@
 <template>
   <div id="app">
-    <!-- <leaflet></leaflet> -->
-    <baidumap></baidumap>
+    <leaflet></leaflet>
+    <!-- <baidumap></baidumap> -->
     <!-- <router-view/> -->
   </div>
 </template>
 
 <script>
 import leaflet from "./components/leaflet/leaflet"
-import baidumap from './components/baidumap/baidumap'
+// import baidumap from './components/baidumap/baidumap'
 export default {
   // name: 'App'
   components:{
     leaflet,
-    baidumap
+
   }
 }
 </script>

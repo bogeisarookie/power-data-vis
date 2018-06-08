@@ -66,6 +66,7 @@
 </script>
 
 <style lang="stylus" scoped>
-  .content height 1080px width 100%
-
+  .content
+    height 1080px
+    width 100%
 </style>
