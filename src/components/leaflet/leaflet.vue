@@ -12,11 +12,13 @@
 <script>
 import "leaflet/dist/leaflet.js";
 import "leaflet/dist/leaflet.css";
-import "../../libs/leaflet.ChineseTmsProviders.js";
+import "../../common/leaflet.ChineseTmsProviders.js";
+import "../../common/loadMap.js";
+import url from "../../common/URLconf.js";
 import Vue from "vue";
 import axios from "axios";
-Vue.prototype.$http = axios;
 
+Vue.prototype.$http = axios;
 
 export default {
   data() {
@@ -25,18 +27,43 @@ export default {
       current_zoom: 12
     };
   },
+  
   created() {
     this.$nextTick(function() {
-      this._initmap();
+      /**
+       * 加载离线地图或者在线地图
+       */
+      // this._initmap();
+      this._initCustomeMap();
     });
   },
   methods: {
     selectPowerData() {
       this.$http({
         method: "get",
-        url: BASEURL+"/api/powerData/selectPowerData"
+        url: url.BASEURL + "/api/powerData/selectPowerData"
       }).then(response => {
         console.log(response.data);
+      });
+    },
+    _initCustomeMap() {
+      let mapcenter = new L.latLng(31.8255035997894, 117.180128945313);
+      let tileLayer = new L.TileLayer.zhbLoadGuge(
+        "http://localhost:8080/testmap",
+        {
+          maxZoom: 18,
+          minZoom: 9,
+          center: mapcenter
+        }
+      );
+      this.map = L.map("map", {
+        center: mapcenter,
+        zoom: 14, //默认展示的缩放级别
+        opacity: 0.1 //图层的不透明度
+      });
+      tileLayer.addTo(this.map);
+      this.map.on("zoomend", ev => {
+        this.current_zoom = this.map.getZoom(); // ev is an event object (MouseEvent in this case)
       });
     },
     _initmap() {
@@ -71,21 +98,19 @@ export default {
         this.current_zoom = this.map.getZoom(); // ev is an event object (MouseEvent in this case)
       });
     }
+  },
+  components: {
+    url
   }
 };
 </script>
 
 <style lang="stylus" scoped>
-.leaflet-wrapper {
-  height: 600px;
-
-  .map-title {
-    height: 50px;
-  }
-
-  .map {
-    height: 550px;
-  }
-}
+.leaflet-wrapper
+  height 600px
+  .map-title
+    height 50px
+  .map
+    height 550px
 </style>
 
