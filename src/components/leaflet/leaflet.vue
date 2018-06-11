@@ -1,8 +1,8 @@
 <template>
   <div class="leaflet-wrapper">
-    <div class="map-title">
+    <!-- <div class="map-title">
       <span>当前层级{{current_zoom}}</span>
-    </div>
+    </div> -->
     <div id="map" class="map"></div>
     <div class='control'>
       <button class='control-button' @click="selectPowerData">测试</button>
@@ -10,16 +10,24 @@
   </div>
 </template>
 <script>
-import "leaflet/dist/leaflet.js";
 import "leaflet/dist/leaflet.css";
+import "leaflet/dist/leaflet.js";
 import "../../common/leaflet.ChineseTmsProviders.js";
 import "../../common/loadMap.js";
+import test_data from "../../common/data.js";
 import url from "../../common/URLconf.js";
 import Vue from "vue";
 import axios from "axios";
+import func from "./vue-temp/vue-editor-bridge.js";
 
 Vue.prototype.$http = axios;
+delete L.Icon.Default.prototype._getIconUrl;
 
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
+  iconUrl: require("leaflet/dist/images/marker-icon.png"),
+  shadowUrl: require("leaflet/dist/images/marker-shadow.png")
+});
 export default {
   data() {
     return {
@@ -27,7 +35,7 @@ export default {
       current_zoom: 12
     };
   },
-  
+
   created() {
     this.$nextTick(function() {
       /**
@@ -47,7 +55,7 @@ export default {
       });
     },
     _initCustomeMap() {
-      let mapcenter = new L.latLng(31.8255035997894, 117.180128945313);
+      let mapcenter = new L.latLng(31.843368, 117.296133);
       let tileLayer = new L.TileLayer.zhbLoadGuge(
         "http://localhost:8080/testmap",
         {
@@ -64,6 +72,34 @@ export default {
       tileLayer.addTo(this.map);
       this.map.on("zoomend", ev => {
         this.current_zoom = this.map.getZoom(); // ev is an event object (MouseEvent in this case)
+        console.log("当前层级：" + this.current_zoom);
+      });
+      this.map.on("click", ev => {
+        console.log("点击的经纬度坐标" + ev.latlng);
+      });
+      /**
+       * 绘制模拟数据
+       *
+       */
+      // let data = test_data.mockData();
+      // console.log(data);
+      data.forEach(element => {
+        // L.circle([element.lat, element.lng], {
+        //   radius: 200,
+        //   color: function(element) {
+        //     if (element.type == 0) {
+        //       return "red";
+        //     }
+
+        //     if (element.type == 1) {
+        //       return "blue";
+        //     }
+
+        //     if (element.type == 2) {
+        //       return "green";
+        //     }
+        //   }
+        // }).addTo(this.map);
       });
     },
     _initmap() {
@@ -107,10 +143,18 @@ export default {
 
 <style lang="stylus" scoped>
 .leaflet-wrapper
-  height 600px
-  .map-title
-    height 50px
+  display inline-block
+  height 100%
+  width 830px
   .map
-    height 550px
+    position relative
+    top 10px
+    margin 10px 0px
+    height 600px
+    width 790
+    border 5px solid white
+    border-radius 5px
+  .control
+    position relative
 </style>
 

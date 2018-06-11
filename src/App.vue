@@ -1,18 +1,21 @@
 <template>
   <div id="app">
     <leaflet></leaflet>
+    <projectview></projectview>
     <!-- <baidumap></baidumap> -->
     <!-- <router-view/> -->
   </div>
 </template>
 
 <script>
-import leaflet from "./components/leaflet/leaflet"
+import leaflet from "./components/leaflet/leaflet.vue"
+import projectview from './components/projectview/projectview'
 // import baidumap from './components/baidumap/baidumap'
 export default {
   // name: 'App'
   components:{
     leaflet,
+    projectview
 
   }
 }
@@ -25,6 +28,7 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  background-color: #DDDDDD;
+  margin-top: 0px;
 }
 </style>
