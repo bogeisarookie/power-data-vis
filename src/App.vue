@@ -30,5 +30,6 @@ export default {
   color: #2c3e50;
   background-color: #DDDDDD;
   margin-top: 0px;
+  list-style-type:none;
 }
 </style>
