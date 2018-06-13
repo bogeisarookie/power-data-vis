@@ -39,10 +39,17 @@ import test_data from "../../common/data.js";
 import url from "../../common/URLconf.js";
 import Vue from "vue";
 import axios from "axios";
+//区域选择
 import "leaflet.pm";
 import "leaflet.pm/dist/leaflet.pm.css";
+//判断是否在区域内
 import leafletPip from "@mapbox/leaflet-pip";
-import '../../common/leaflet-heat.js'
+//热力图
+import "../../common/leaflet-heat.js";
+//awesomeMarker
+import "../../common/styles/style.css";
+import "../../common/leaflet.awesome-markers.css";
+import "../../common/leaflet.awesome-markers.js";
 
 Vue.prototype.$http = axios;
 delete L.Icon.Default.prototype._getIconUrl;
@@ -55,12 +62,13 @@ L.Icon.Default.mergeOptions({
 export default {
   data() {
     return {
-      points:[],
-      data:'',
+      points: [],
+      data: "",
       map: null,
       current_zoom: 12,
       poly: [],
-      hefeiGeo: ""
+      hefeiGeo: "",
+      markersLayer:''
     };
   },
 
@@ -72,7 +80,6 @@ export default {
       this._initmap();
       // this.initGeoJson();
       this.initDrawTool();
-      this.heatmap()
 
       // this._initCustomeMap();
     });
@@ -110,6 +117,7 @@ export default {
         console.log("点击的经纬度坐标" + ev.latlng);
       });
     },
+    initData() {},
     _initmap() {
       var normalMap = L.tileLayer.chinaProvider("Google.Normal.Map", {
           maxZoom: 18,
@@ -119,9 +127,13 @@ export default {
           maxZoom: 18,
           minZoom: 5
         });
+      let heat = L.heatLayer(this.points, { radius: 25 });
+      let heatmap = L.layerGroup([normalMap, heat]);
+      this.markersLayer=new L.layerGroup()
       let baseLayers = {
         地图: normalMap,
-        影像: satelliteMap
+        影像: satelliteMap,
+        热图: heatmap
       };
       let overlayLayers = {};
       this.map = L.map("map", {
@@ -152,13 +164,13 @@ export default {
       this.data = test_data.mockData();
       console.log(this.data);
       this.data.forEach(element => {
-        this.points.push([element.lat,element.lng,element.level*2])
+        this.points.push([element.lat, element.lng, element.level * 2]);
         L.circle([element.lat, element.lng], {
           radius: 30,
           stroke: false,
           fillOpacity: (function(element) {
             if (element.level === 1) {
-              return 0.2;
+              return 0.1;
             }
             if (element.level === 2) {
               return 0.4;
@@ -188,6 +200,8 @@ export default {
           })(element)
         }).addTo(this.map);
       });
+
+      console.log();
     },
     initDrawTool() {
       // define toolbar options
@@ -218,9 +232,44 @@ export default {
             if (results) {
               if (results.length) {
                 console.log(layer);
-
-                layer.setStyle({ stroke: true, weight: 1 });
-                layer.setRadius(60);
+                let marker = L.marker(layer._latlng, {
+                  icon: L.AwesomeMarkers.icon({
+                    icon: (function(layer) {
+                      if (layer.options.color == "red") {
+                        return "zb-white";
+                      }
+                      if (layer.options.color == "blue") {
+                        return "gb-white";
+                      }
+                      if (layer.options.color == "green") {
+                        return "line-white";
+                      }
+                      if (layer.options.color == "yellow") {
+                        return "user-white";
+                      }
+                      if (layer.options.color == "purple") {
+                        return "add-white";
+                      }
+                    })(layer),
+                    prefix: "icon",
+                    markerColor: (function(layer) {
+                      if (layer.options.fillOpacity == 0.1) {
+                        return "green";
+                      }
+                      if (layer.options.fillOpacity == 0.4) {
+                        return "orange";
+                      }
+                      if (layer.options.fillOpacity == 0.8) {
+                        return "red";
+                      }
+                    })(layer),
+                    iconColor: "white"
+                  })
+                });
+                this.markersLayer.addLayer(marker)
+                this.markersLayer.addTo(this.map)
+                // layer.setStyle({ stroke: true, weight: 1 });
+                // layer.setRadius(60);
               }
             }
           }
@@ -238,6 +287,9 @@ export default {
         // check self intersection
         layer.pm.hasSelfIntersection();
       });
+      this.map.on('pm:remove', e =>{
+        this.markersLayer.clearLayers()
+      });
     },
     initGeoJson() {
       this.hefeiGeo = L.geoJSON(geojson, {
@@ -246,9 +298,7 @@ export default {
         }
       }).addTo(this.map);
     },
-    heatmap(){
-      let heat=L.heatLayer(this.points,{radius:25}).addTo(this.map)
-    }
+    initheatmap() {}
   },
   components: {
     url
@@ -286,9 +336,9 @@ export default {
           background-color red
         &.gb
           background-color blue
-        &.yh
-          background-color green
         &.xl
+          background-color green
+        &.yh
           background-color yellow
         &.yk
           background-color purple
